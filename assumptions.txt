@@ -1,0 +1,109 @@
+Assumptions & Thoughts
+======================
+
+ * we have a twitter username of the user for some of our users
+   in the database.
+
+ * we are using UserProfile feature of django to associate twitter
+   usernames, AUTH_PROFILE_MODULE="photos.UserProfile", which has
+   a .twitter_username(CharField, max_length=100, blank=True).
+
+ * twitter search, and even firehose is not reliable for our 
+   application, though they appear better from "performance"
+   point of view. 
+
+   reasoning: not all tweets are gaurnteed to show up if we search
+   for #carnival, and try to filter out twitter usernames who belong
+   to our database.
+
+   alternative: for each user in our database, we make a separate
+   call to twitter, get their tweet history, and "manually" search
+   #carnival in them. it is more work, more bandwidth etc, but 
+   the end user result is superior.
+
+   aim: we do not want to miss even a single photo tweeted by
+   the user.
+
+   Twitter Site Streams: is probably the ideal way to communicate
+   with twitter for application we have in mind, but its in 
+   limited beta.
+
+   https://dev.twitter.com/docs/streaming-apis/streams/site
+
+ * We identify the album we created for these photos by assuming
+   the name of the album is "#carnival" and assume it is unique.
+   [ideally album may have some metadata to handle this, and the
+   name may be available to user to modify as per their taste].
+
+   [further ideally, the even proper thing could be to find the 
+   twitter search term, in this case #carnival, itself to come
+   from the metadata on album, and we may want to do all this
+   for all albums a user has which has that meta data set.]
+
+   [on further thought, since its not really much more work, I am 
+   going implement this more generic solution].
+
+  * Album Model:
+    * user -> fk (user)
+    * name -> CharField(max_length=100, blank=True)
+    * twitter_search: CharField(max_length=100, blank=True)
+    * sort: IntegerField(default=0) # an aid to show albums in 
+      arbitrary (user defined) order
+    * created_on, privacy/sharing options, etc
+
+ * to strictly meet the requirement of assignment, an album 
+   with twitter_search = "#carnival" would be created for 
+   each user with twitter username available.
+
+ * ideally there should be a task queue implementation for this, 
+   with one task source that dumps userid for all users who have
+   twitter_username set. the task queue should not accept duplicate
+   tasks with same userid, so that lagging workers do notget 
+   further over loaded.
+
+ * following the code style in amitu.com/style.html.
+
+ * (maybe) ideally the image URL should be fetched and stored
+   in storage controlled by us, not doing it. also resizing/thumbnailing,
+   not doing those either for now.
+
+ * "number of likes and his owner", the owner word here is probably
+   a typo, and it should read "number of likes and who are in it", 
+   as the picture belongs to album and album is owned by a user.
+
+   even if album could be owned by more than one owners, it might still
+   make more sense, if we are storing a set of users along with each
+   picture, to have them the list of users who are in the picture.
+
+   also, in the list of "owner", i am assuming the facebook uid is stored,
+   as the feature is facebook specific [doesnt have to be, dont know what
+   is proper product decision here, we can either import all users tagged
+   and automatically create an account for them, probably this is better
+   solution]
+
+   recapping: picture has .tagged many to many field with User object,
+   and UserProfile contains facebook_uid if available. when tagging, 
+   we will find all users from .tagged with facebook_uid set.
+
+ * since we are recrawling every 20 mins, i am assuming that user would
+   not have posted more than 100 tweets in that duration. with this 
+   assumption we do not have to keep track of till where we have seen
+   things, and we can always process all latest 100. de-duping logic on
+   URLs will eliminate any duplicates. [de-duping is required in anycase,
+   if user tweets the same picture twice, we dont want it twice in the 
+   album]
+
+ * notes of twitter rate limiting: 
+
+      https://dev.twitter.com/docs/rate-limiting/1.1
+
+      Rate limiting in version 1.1 of the API is primarily considered on a per-
+      user basis — or more accurately described, per access token in your
+      control. If a method allows for 15 requests per rate limit window, then
+      it allows you to make 15 requests per window per leveraged access token.
+
+    which means if we have access token for each users then we are in clear
+    at arbitrarily large scales.
+
+
+
