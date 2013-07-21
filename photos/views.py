@@ -21,7 +21,7 @@ def albums(request, username):
 			user=d.get_object_or_404(User, username=username)
 			# user__username=username is also suffecient, but we want proper 
 			# 404 if user does not exist, and we dont want to give 404 if there
-			# are no albums, which is what ll happen if we use 
+			# are no albums, which is what will happen if we use 
 			# allow_empty=False
 		),
 		template_name = "album_list.html",
@@ -40,7 +40,7 @@ def photo_jsoner(context):
 		"pagination_info": context.get("pagination_info", {})
 	}
 
-@d("/album/<int:albumid>")
+@d("/album/<int:albumid>/")
 def album(request, albumid):
 	return object_list( 
 		request, 
