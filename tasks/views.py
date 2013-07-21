@@ -11,7 +11,11 @@ def idx(request):
 	# no regard to performace, this is purely internal/debugging
 	# tool
 
-	statuses = Task.objects.values('status').annotate(count=Count('status'))
+	statuses = dict(
+		(row["status"], row["count"]) for row in Task.objects.values(
+			'status'
+		).annotate(count=Count('status'))
+	)
 	total_tasks = sum(statuses.values())
 
 	# tasks that are pending since more than k mins to be assigned, get k from
@@ -32,27 +36,29 @@ def idx(request):
 
 	return d.JSONResponse({
 		"statuses": statuses,
+		"total_tasks": total_tasks,
 		"overdue_tasks": overdue_tasks,
 		"slow_tasks": slow_tasks
 	})
 
 @d("/tasks/get/")
 def get(request):
-	assert request.POST.get("secret") == "super secret"
 	# worker trying to get a new task
-	pass
-
-@d("/tasks/done/")
-def done(request):
 	assert request.POST.get("secret") == "super secret"
+	return Task.objects.get(request.REQUEST["workername"])
+
+@d("/tasks/mark-done/")
+def mark_done(request):
 	# worker saying task is done
-	pass
+	assert request.POST.get("secret") == "super secret"
+	return Task.objects.mark_done(
+		request.REQUEST["taskid"], request.REQUEST["assign_code"]
+	)
 
 @d("/tasks/clear-slow/")
 def clear_slow(request):
-	assert request.POST.get("secret") == "super secret"
-
 	# maitenance helper, find all slow tasks, and 
 	# mark them unassigned
+	assert request.POST.get("secret") == "super duper secret"
 	Task.clear_slow()
 	

@@ -5,10 +5,44 @@ class TaskManager(models.Manager):
 	def clear_slow(self):
 		pass
 
-	def add_task(data):
-		# if data is already there and is not marked done only
-		# then add it.
-		pass
+	def create_unique(self, data):
+		if self.filter(data=data).exclude(status="done").count(): return
+		return super(TaskManager, self).create(data=data)
+
+	def get_lock(self): pass
+	def release_lock(self): pass
+
+	def get(self, workername):
+		# this method should be locked. if we use mysql we can use get_lock()
+		# for that, http://djangosnippets.org/snippets/2443/
+		# 
+		# or we can explore the possibility of transactions if database setup 
+		# allows.
+		# 
+		# our current server is single threaded so no locking is required
+
+		self.get_lock()
+		try:
+			tasks = list(self.filter(status="open").limit(1))
+			if not tasks: return {}
+			task = tasks[0]
+			task.assign(workername)
+			return {
+				"data": task.data,
+				"assign_code": task.assign_code,
+				"id": task.id
+			}
+		finally:
+			self.release_lock()
+
+	def mark_done(self, taskid, code):
+		self.get_lock()
+		try:
+			task = self.get(id=taskid)
+			task.mark_done(code)
+			return {"success": "true"}
+		finally:
+			self.release_lock()
 
 class Task(models.Model): # unique data task.
 	data = models.TextField()
@@ -21,7 +55,7 @@ class Task(models.Model): # unique data task.
 
 	objects = TaskManager()
 
-	def assign(self, workername="unknow"):
+	def assign(self, workername="unknown"):
 		assert self.status == "open"
 		now = datetime.now()
 
