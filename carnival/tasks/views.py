@@ -5,7 +5,7 @@ from importd import d
 
 @d("/tasks/")
 def idx(request):
-	assert request.GET.get("secret") == "super secret"
+	assert request.GET.get("secret") == "supersecret"
 	# show a summary of tasks
 
 	# no regard to performace, this is purely internal/debugging
