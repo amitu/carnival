@@ -1,10 +1,15 @@
 from importd import d
 
-d(DEBUG=True)
+d(
+	DEBUG=True,
+	INSTALLED_APPS=[
+		"django.contrib.contenttypes",
+		"django.contrib.auth",
 
-@d("/")
-def idx(request):
-	return d.HttpResponse("hey")
+		"photos", 
+		"tasks",
+	]
+)
 	
 if __name__ == "__main__":
     d.main()

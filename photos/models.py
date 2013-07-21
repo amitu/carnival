@@ -14,7 +14,15 @@ class Album(models.Model):
 			self.__dict__
 		)
 
-	def mail_owner_if_required(self): pass
+	def toJSON(self):
+		return {
+			"id": self.id,
+			"name": self.name,
+			"user": self.user.username
+		}
+
+	def mail_owner_if_x00(self):
+		pass
 
 	def collage_and_fb_it(self, message=""):
 		if not message:
@@ -45,6 +53,13 @@ class Photo(models.Model):
 	created_on = models.DateTimeField(default=datetime.now)
 
 	def __unicode__(self): return "%(title)s <- %(album)s" % self.__dict__
+
+	def toJSON(self):
+		return {
+			"url": self.url,
+			"title": self.title,
+			"album": self.album.id
+		}
 
 class Tag(models.Model):
 	user = models.ForeignKey(User)

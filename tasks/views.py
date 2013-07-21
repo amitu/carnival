@@ -3,7 +3,9 @@ from django.db.models import Count
 from datetime import datetime, timedelta
 from importd import d
 
+@d("/tasks/")
 def idx(request):
+	assert request.GET.get("secret") == "super secret"
 	# show a summary of tasks
 
 	# no regard to performace, this is purely internal/debugging
@@ -34,15 +36,22 @@ def idx(request):
 		"slow_tasks": slow_tasks
 	})
 
+@d("/tasks/get/")
 def get(request):
+	assert request.POST.get("secret") == "super secret"
 	# worker trying to get a new task
 	pass
 
+@d("/tasks/done/")
 def done(request):
+	assert request.POST.get("secret") == "super secret"
 	# worker saying task is done
 	pass
 
+@d("/tasks/clear-slow/")
 def clear_slow(request):
+	assert request.POST.get("secret") == "super secret"
+
 	# maitenance helper, find all slow tasks, and 
 	# mark them unassigned
 	Task.clear_slow()

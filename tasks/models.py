@@ -11,7 +11,7 @@ class TaskManager(models.Manager):
 		pass
 
 class Task(models.Model): # unique data task.
-	data = models.TextFeild()
+	data = models.TextField()
 	status = models.CharField(max_length=20, default="open") # open/assigned/done
 	assign_code = models.CharField(max_length=32, blank=True)
 
