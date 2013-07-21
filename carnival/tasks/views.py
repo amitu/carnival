@@ -44,13 +44,13 @@ def idx(request):
 @d("/tasks/get/")
 def get(request):
 	# worker trying to get a new task
-	assert request.POST.get("secret") == "super secret"
+	assert request.REQUEST.get("secret") == "supersecret"
 	return Task.objects.get(request.REQUEST["workername"])
 
 @d("/tasks/mark-done/")
 def mark_done(request):
 	# worker saying task is done
-	assert request.POST.get("secret") == "super secret"
+	assert request.REQUEST.get("secret") == "supersecret"
 	return Task.objects.mark_done(
 		request.REQUEST["taskid"], request.REQUEST["assign_code"]
 	)
@@ -59,6 +59,6 @@ def mark_done(request):
 def clear_slow(request):
 	# maitenance helper, find all slow tasks, and 
 	# mark them unassigned
-	assert request.POST.get("secret") == "super duper secret"
+	assert request.POST.get("secret") == "superdupersecret"
 	Task.clear_slow()
 	

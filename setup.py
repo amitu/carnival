@@ -18,13 +18,7 @@ setup(
     license = 'BSD',
 
     install_requires = ["importd", "facebook-sdk", "tweepy"],
-    packages = find_packages(), # carnival.tasks, carnival.photos
+    packages = find_packages(),
 
-    zip_safe = True,
-
-    entry_points={
-        'console_scripts': [
-            'worker = carnival.worker:main',
-        ]
-    }
+    zip_safe = True
 )

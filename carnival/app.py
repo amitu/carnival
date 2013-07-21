@@ -6,11 +6,12 @@ d(
 		"django.contrib.contenttypes",
 		"django.contrib.auth",
 
-		"photos", 
-		"tasks",
-	]
+		"carnival.photos", 
+		"carnival.tasks",
+	],
 	TWITTER_KEY = "...", 
-	TWITTER_SECRET = "..."
+	TWITTER_SECRET = "...",
+	AUTH_PROFILE_MODULE = 'carnival.photos.models.UserProfile',
 )
 	
 if __name__ == "__main__":

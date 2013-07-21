@@ -1,5 +1,9 @@
 import sys, requests, time, tweepy, re
+from carnival import app
+
 from django.core.mail import EmailMessage
+
+from photos.models import Album, Photo, User
 
 worker_name = sys.argv[1]
 task_server = "http://localhost:8000/tasks/"
@@ -10,14 +14,17 @@ TRAILING_PUNCTUATION = ['.', ',', ':', ';', '.)']
 WRAPPING_PUNCTUATION = [('(', ')'), ('<', '>'), ('[', ']'), ('&lt;', '&gt;')]
 
 def get_task():
-	r = requests.get(task_server + "get/", {"worker_name": worker_name})
-	return r.json()
+	r = requests.get(task_server + "get/", params={
+		"workername": worker_name, 
+		"secret": "supersecret"
+	})
+	return r.json
 
 def mark_done(taskid, assign_code):
 	r = requests.post(
-		task_server + "mark-done/", {
-			"worker_name": worker_name, "taskid": taskid,
-			"assign_code": assign_code
+		task_server + "mark-done/", params={
+			"workername": worker_name, "taskid": taskid,
+			"assign_code": assign_code, "secret": "supersecret"
 		}
 	)
 	return r.json()
@@ -76,7 +83,7 @@ def get_imagish_urls(urls):
 	# find mimetype of each url?
 
 	return [
-		url for urls 
+		url for url in urls
 		if 
 			url.lower().endswith(".jpg") or 
 			url.lower().endswith(".jpeg") or
@@ -123,7 +130,11 @@ def send_mail_about_album(album):
 def do_once():
 	task = get_task()
 
-	if not task: return # server returns empty dict if there is no task
+	if not task: 
+		print "Nothing to do."
+		return # server returns empty dict if there is no task
+
+	print "Got Task", task
 
 	user = User.objects.get(id=task["data"])
 	albums = get_user_albums_with_tweet_search(user)
@@ -149,13 +160,14 @@ def do_once():
 			send_mail_about_album(album)
 
 	mark_done(task["taskid"], task["assign_code"])
+	print "Task done."
 
 def main():
 	while True:
 		try:
 			do_once()
 			time.sleep(1) # grow enough that this line has to be removed!
-		except KeyboardInterrupt:before_album_centuary = album.photo_set.count() // 100
+		except KeyboardInterrupt:
 			print "Worker stopped."
 			break
 		except Exception, e:

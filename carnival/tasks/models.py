@@ -23,7 +23,9 @@ class TaskManager(models.Manager):
 
 		self.get_lock()
 		try:
-			tasks = list(self.filter(status="open").limit(1))
+			tasks = list(self.filter(status="open")[:1]) 
+			# if we dont do it list, then i *guess* django may call count(),
+			# making it two queries
 			if not tasks: return {}
 			task = tasks[0]
 			task.assign(workername)

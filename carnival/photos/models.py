@@ -70,3 +70,11 @@ class Tag(models.Model):
 	y = models.IntegerField(default=0)
 
 	# width and height are constant for each tag?
+
+class UserProfile(models.Model):
+	user = models.ForeignKey(User, unique=True)
+	twitter_username = models.CharField(max_length=100, blank=True)
+	twitter_key = models.CharField(max_length=100, blank=True)
+	twitter_secret = models.CharField(max_length=100, blank=True)
+	facebook_uid = models.CharField(max_length=100, blank=True)
+	facebook_token = models.CharField(max_length=100, blank=True)
